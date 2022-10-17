@@ -1,3 +1,6 @@
+const saveBtn = document.querySelector("#save");
+const textInput = document.querySelector("#text");
+const file = document.querySelector("#file");
 const eraseBtn = document.querySelector("#eraser-btn");
 const destroyBtn = document.querySelector("#destroy-btn");
 const modeBtn = document.querySelector("#mode-btn");
@@ -9,6 +12,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = 800;
 canvas.height = 800;
 ctx.lineWidth = lineWidth.value;
+ctx.lineCap = "round";
 
 function drawLine(startPosX, startPosY, endPosX, endPosY, lineWidth) {
   ctx.beginPath();
@@ -86,11 +90,41 @@ function onEraserClick() {
   modeBtn.innerText = "Fill";
 }
 
+function onImageChange(event) {
+  const myfile = event.target.files[0];
+  const url = URL.createObjectURL(myfile);
+  const image = new Image();
+  image.src = url;
+  image.onload = function () {
+    ctx.drawImage(image, 0, 0);
+  };
+}
+
+function onDoubleClick(event) {
+  const text = textInput.value;
+  if (text !== "") {
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.font = "48px serif";
+    ctx.fillText(text, event.offsetX, event.offsetY);
+    ctx.restore();
+  }
+}
+
+function onSaveClick(event) {
+  const url = canvas.toDataURL();
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "myDrawing.png";
+  anchor.click();
+}
+
 canvas.addEventListener("mousemove", onMove);
 canvas.addEventListener("mousedown", onMouseDown);
 canvas.addEventListener("mouseup", onMouseUp);
 canvas.addEventListener("mouseleave", onMouseUp);
 canvas.addEventListener("click", onCanvasClick);
+canvas.addEventListener("dblclick", onDoubleClick);
 
 lineWidth.addEventListener("change", onValueChange);
 color.addEventListener("change", onColorChange);
@@ -100,3 +134,7 @@ colorOptions.forEach((color) => color.addEventListener("click", onColorClick));
 modeBtn.addEventListener("click", onModeClick);
 destroyBtn.addEventListener("click", onDestroyClick);
 eraseBtn.addEventListener("click", onEraserClick);
+
+file.addEventListener("change", onImageChange);
+
+saveBtn.addEventListener("click", onSaveClick);
